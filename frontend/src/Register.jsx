@@ -1,19 +1,29 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import AnimatedBackground from "./AnimatedBackground";
 
 const inputStyle = {
   width: "100%",
-  padding: "14px",
-  marginTop: "6px",
-  background: "#0a0a0a",
-  border: "1px solid #2a2a2a",
-  borderRadius: "12px",
+  padding: "13px 18px",
+  marginTop: "8px",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: "14px",
   color: "#fff",
-  fontSize: "16px"
+  fontSize: "15px",
+  fontFamily: "'DM Sans', sans-serif",
+  transition: "all 0.3s ease",
+  boxSizing: "border-box"
 };
 
-const labelStyle = { color: "#888", fontSize: "14px" };
+const labelStyle = {
+  color: "rgba(255,255,255,0.45)",
+  fontSize: "12px",
+  fontWeight: "600",
+  letterSpacing: "1px",
+  textTransform: "uppercase"
+};
 
 function Register() {
   const [form, setForm] = useState({
@@ -28,62 +38,75 @@ function Register() {
   };
 
   const handleRegister = async () => {
-  // Basic validation first
-  if (!form.name || !form.email || !form.password || !form.age || !form.gender) {
-    alert("Please fill in all required fields.");
-    return;
-  }
+    if (!form.name || !form.email || !form.password || !form.age || !form.gender) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await axios.post("https://affinity-hub.onrender.com/api/auth/register", {
+        ...form,
+        age: Number(form.age),
+        interests: form.interests.split(",").map(i => i.trim())
+      });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      navigate("/discover");
+    } catch (err) {
+      const message = err.response?.data?.message || "Registration failed. Please try again.";
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  setLoading(true);
-  try {
-    const res = await axios.post("https://affinity-hub.onrender.com/api/auth/register", {
-      ...form,
-      age: Number(form.age),
-      interests: form.interests.split(",").map(i => i.trim())
-    });
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    navigate("/discover");
-  } catch (err) {
-    // ✅ Show actual error from backend instead of generic message
-    const message = err.response?.data?.message || "Registration failed. Please try again.";
-    alert(message);
-    console.error("Full error:", err.response?.data);
-  } finally {
-    setLoading(false); // ✅ Always runs even if error
-  }
-};
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #0a0a0a 0%, #1a0a0f 100%)",
+      background: "linear-gradient(135deg, #060608 0%, #0f0610 50%, #060608 100%)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "20px"
+      padding: "20px",
+      position: "relative"
     }}>
-      <div style={{ width: "100%", maxWidth: "400px" }}>
+      <AnimatedBackground />
 
+      <div style={{
+        width: "100%",
+        maxWidth: "420px",
+        position: "relative",
+        zIndex: 1,
+        animation: "fadeInUp 0.6s ease forwards"
+      }}>
         {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <div style={{ fontSize: "50px" }}>💕</div>
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div style={{ fontSize: "52px", marginBottom: "10px", display: "inline-block", animation: "heartbeat 1.5s ease-in-out infinite" }}>💕</div>
           <h1 style={{
-            fontSize: "30px",
+            fontSize: "34px",
             fontWeight: "800",
-            background: "linear-gradient(135deg, #fd5068, #ff8c5a)",
+            fontFamily: "'Playfair Display', serif",
+            background: "linear-gradient(135deg, #ff2d55 0%, #ff6b35 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent"
           }}>Affinity Hub</h1>
         </div>
 
         {/* Card */}
-        <div style={{
-          background: "#1a1a1a",
-          borderRadius: "24px",
-          padding: "40px",
-          border: "1px solid #2a2a2a"
-        }}>
-          <h2 style={{ marginBottom: "24px", fontSize: "24px" }}>Create Account ✨</h2>
+        <div className="glass-card" style={{ padding: "36px" }}>
+          <div style={{
+            position: "absolute",
+            top: "-1px", left: "20%", right: "20%",
+            height: "2px",
+            background: "linear-gradient(90deg, transparent, rgba(255,45,85,0.6), transparent)"
+          }} />
+
+          <h2 style={{
+            marginBottom: "24px",
+            fontSize: "24px",
+            fontWeight: "700",
+            fontFamily: "'Playfair Display', serif"
+          }}>Create Account ✨</h2>
 
           <div style={{ marginBottom: "14px" }}>
             <label style={labelStyle}>Full Name</label>
@@ -107,11 +130,11 @@ function Register() {
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Gender</label>
-              <select name="gender" onChange={handleChange} style={{ ...inputStyle, marginTop: "6px" }}>
-                <option value="">Select</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+              <select name="gender" onChange={handleChange} style={{ ...inputStyle, marginTop: "8px" }}>
+                <option value="" style={{ background: "#0f0f14" }}>Select</option>
+                <option value="male" style={{ background: "#0f0f14" }}>Male</option>
+                <option value="female" style={{ background: "#0f0f14" }}>Female</option>
+                <option value="other" style={{ background: "#0f0f14" }}>Other</option>
               </select>
             </div>
           </div>
@@ -123,15 +146,11 @@ function Register() {
               placeholder="Tell something about yourself..."
               onChange={handleChange}
               rows={3}
-              style={{
-                ...inputStyle,
-                resize: "none",
-                fontFamily: "inherit"
-              }}
+              style={{ ...inputStyle, resize: "none" }}
             />
           </div>
 
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "28px" }}>
             <label style={labelStyle}>Interests (comma separated)</label>
             <input name="interests" placeholder="Music, Travel, Gaming" onChange={handleChange} style={inputStyle} />
           </div>
@@ -139,26 +158,49 @@ function Register() {
           <button
             onClick={handleRegister}
             disabled={loading}
-            style={{
-              width: "100%",
-              padding: "16px",
-              background: "linear-gradient(135deg, #fd5068, #ff8c5a)",
-              borderRadius: "12px",
-              color: "#fff",
-              fontSize: "16px",
-              fontWeight: "700",
-              opacity: loading ? 0.7 : 1
-            }}
+            className="btn-primary"
           >
-            {loading ? "Creating account..." : "Create Account 🎉"}
+            {loading ? (
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <span style={{
+                  width: "16px", height: "16px",
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  borderTopColor: "#fff",
+                  borderRadius: "50%",
+                  display: "inline-block",
+                  animation: "spin 0.7s linear infinite"
+                }} />
+                Creating account...
+              </span>
+            ) : "Create Account 🎉"}
           </button>
 
-          <p style={{ textAlign: "center", marginTop: "20px", color: "#888" }}>
+          <p style={{ textAlign: "center", marginTop: "20px", color: "rgba(255,255,255,0.4)", fontSize: "14px" }}>
             Already have account?{" "}
-            <Link to="/" style={{ color: "#fd5068", fontWeight: "600" }}>Login</Link>
+            <Link to="/" style={{ color: "#ff2d55", fontWeight: "700" }}>Login</Link>
           </p>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes heartbeat {
+          0%, 100% { transform: scale(1); }
+          14% { transform: scale(1.2); }
+          28% { transform: scale(1); }
+          42% { transform: scale(1.15); }
+          70% { transform: scale(1); }
+        }
+        input:focus, textarea:focus, select:focus {
+          border-color: rgba(255,45,85,0.5) !important;
+          background: rgba(255,45,85,0.05) !important;
+          box-shadow: 0 0 0 3px rgba(255,45,85,0.1) !important;
+        }
+      `}</style>
     </div>
   );
 }

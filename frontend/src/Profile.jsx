@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import AnimatedBackground from "./AnimatedBackground";
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -21,9 +22,7 @@ function Profile() {
       bio: parsed.bio || "",
       age: parsed.age || "",
       gender: parsed.gender || "",
-      interests: Array.isArray(parsed.interests)
-        ? parsed.interests.join(", ")
-        : parsed.interests || ""
+      interests: Array.isArray(parsed.interests) ? parsed.interests.join(", ") : parsed.interests || ""
     });
   }, []);
 
@@ -32,11 +31,7 @@ function Profile() {
     try {
       const res = await axios.put(
         "https://affinity-hub.onrender.com/api/auth/profile",
-        {
-          ...form,
-          age: Number(form.age),
-          interests: form.interests.split(",").map(i => i.trim()).filter(Boolean)
-        },
+        { ...form, age: Number(form.age), interests: form.interests.split(",").map(i => i.trim()).filter(Boolean) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const updatedUser = { ...user, ...res.data };
@@ -44,7 +39,7 @@ function Profile() {
       setUser(updatedUser);
       setEditing(false);
       setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => setSaved(false), 2500);
     } catch (err) {
       alert("Failed to save. Please try again.");
     }
@@ -55,34 +50,40 @@ function Profile() {
 
   const inputStyle = {
     width: "100%",
-    padding: "12px 14px",
-    background: "#0a0a0a",
-    border: "1px solid #fd5068",
-    borderRadius: "10px",
+    padding: "12px 16px",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,45,85,0.3)",
+    borderRadius: "12px",
     color: "#fff",
     fontSize: "15px",
-    marginTop: "6px",
-    boxSizing: "border-box"
+    marginTop: "8px",
+    boxSizing: "border-box",
+    fontFamily: "'DM Sans', sans-serif",
+    transition: "all 0.2s"
   };
 
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#0a0a0a",
-      paddingBottom: "80px"
+      background: "linear-gradient(135deg, #060608 0%, #0f0610 50%, #060608 100%)",
+      paddingBottom: "80px",
+      position: "relative"
     }}>
+      <AnimatedBackground />
 
       {/* Header */}
       <div style={{
         padding: "20px 24px",
         display: "flex", justifyContent: "space-between", alignItems: "center",
-        borderBottom: "1px solid #1a1a1a",
-        position: "sticky", top: 0, zIndex: 10,
-        background: "#0a0a0a"
+        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "rgba(6,6,8,0.8)",
+        backdropFilter: "blur(20px)",
+        position: "sticky", top: 0, zIndex: 10
       }}>
         <h1 style={{
-          fontSize: "22px", fontWeight: "800",
-          background: "linear-gradient(135deg, #fd5068, #ff8c5a)",
+          fontSize: "20px", fontWeight: "800",
+          fontFamily: "'Playfair Display', serif",
+          background: "linear-gradient(135deg, #ff2d55, #ff6b35)",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent"
         }}>💕 My Profile</h1>
@@ -90,146 +91,129 @@ function Profile() {
         <button
           onClick={() => editing ? handleSave() : setEditing(true)}
           style={{
-            padding: "8px 18px",
-            background: editing
-              ? "linear-gradient(135deg, #fd5068, #ff8c5a)"
-              : "transparent",
-            border: editing ? "none" : "1px solid #fd5068",
+            padding: "9px 20px",
+            background: editing ? "linear-gradient(135deg, #ff2d55, #ff6b35)" : "transparent",
+            border: editing ? "none" : "1px solid rgba(255,45,85,0.4)",
             borderRadius: "20px",
-            color: editing ? "#fff" : "#fd5068",
-            fontWeight: "700", fontSize: "14px",
-            cursor: "pointer"
+            color: editing ? "#fff" : "#ff2d55",
+            fontWeight: "700", fontSize: "13px",
+            cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif",
+            boxShadow: editing ? "0 4px 16px rgba(255,45,85,0.3)" : "none",
+            transition: "all 0.2s"
           }}>
           {saving ? "Saving..." : editing ? "💾 Save" : "✏️ Edit"}
         </button>
       </div>
 
-      <div style={{ padding: "24px", maxWidth: "480px", margin: "0 auto" }}>
+      <div style={{ padding: "24px", maxWidth: "480px", margin: "0 auto", position: "relative", zIndex: 1 }}>
 
         {/* Success Toast */}
         {saved && (
           <div style={{
-            background: "#00c85320", border: "1px solid #00c853",
-            borderRadius: "12px", padding: "12px 16px",
+            background: "rgba(0,200,83,0.1)", border: "1px solid rgba(0,200,83,0.3)",
+            borderRadius: "14px", padding: "14px 18px",
             color: "#00c853", textAlign: "center",
-            marginBottom: "20px", fontSize: "14px", fontWeight: "600"
+            marginBottom: "20px", fontSize: "14px", fontWeight: "600",
+            animation: "fadeInUp 0.3s ease",
+            backdropFilter: "blur(10px)"
           }}>
             ✅ Profile updated successfully!
           </div>
         )}
 
         {/* Profile Card */}
-        <div style={{
-          background: "#1a1a1a", borderRadius: "24px",
-          overflow: "hidden", border: "1px solid #2a2a2a",
-          marginBottom: "20px"
-        }}>
+        <div className="glass-card" style={{ marginBottom: "20px", overflow: "hidden" }}>
           {/* Cover */}
           <div style={{
-            height: "100px",
-            background: "linear-gradient(135deg, #fd5068, #ff8c5a)"
-          }} />
+            height: "110px",
+            background: "linear-gradient(135deg, #ff2d55 0%, #ff6b35 100%)",
+            position: "relative", overflow: "hidden"
+          }}>
+            <div style={{
+              position: "absolute", width: "200px", height: "200px",
+              borderRadius: "50%", border: "1px solid rgba(255,255,255,0.1)",
+              top: "-80px", right: "-40px"
+            }} />
+            <div style={{
+              position: "absolute", width: "120px", height: "120px",
+              borderRadius: "50%", border: "1px solid rgba(255,255,255,0.08)",
+              bottom: "-40px", left: "20px"
+            }} />
+          </div>
 
           {/* Avatar */}
-          <div style={{ textAlign: "center", marginTop: "-45px", paddingBottom: "20px" }}>
+          <div style={{ textAlign: "center", marginTop: "-48px", paddingBottom: "24px" }}>
             <div style={{
-              width: "90px", height: "90px", borderRadius: "50%",
-              background: "linear-gradient(135deg, #1a1a1a, #2a2a2a)",
+              width: "96px", height: "96px", borderRadius: "50%",
+              background: "rgba(15,6,16,0.9)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "40px", margin: "0 auto",
-              border: "4px solid #0a0a0a"
+              fontSize: "44px", margin: "0 auto",
+              border: "4px solid rgba(255,45,85,0.4)",
+              boxShadow: "0 0 24px rgba(255,45,85,0.2)"
             }}>
               {user.gender === "female" ? "👩" : "👨"}
             </div>
-            <h2 style={{ fontSize: "22px", fontWeight: "800", marginTop: "10px" }}>
-              {user.name}
-            </h2>
-            <p style={{ color: "#888", fontSize: "13px" }}>{user.email}</p>
+            <h2 style={{
+              fontSize: "22px", fontWeight: "800",
+              fontFamily: "'Playfair Display', serif",
+              marginTop: "12px"
+            }}>{user.name}</h2>
+            <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "13px", marginTop: "2px" }}>{user.email}</p>
 
-            {/* Tags */}
-            <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "10px" }}>
-              <span style={{
-                background: "#fd506820", color: "#fd5068",
-                padding: "4px 12px", borderRadius: "20px", fontSize: "12px"
-              }}>
-                🎂 {user.age} yrs
-              </span>
-              <span style={{
-                background: "#fd506820", color: "#fd5068",
-                padding: "4px 12px", borderRadius: "20px", fontSize: "12px",
-                textTransform: "capitalize"
-              }}>
-                ⚧ {user.gender}
-              </span>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "12px" }}>
+              <span className="tag" style={{ fontSize: "12px" }}>🎂 {user.age} yrs</span>
+              <span className="tag" style={{ fontSize: "12px", textTransform: "capitalize" }}>⚧ {user.gender}</span>
             </div>
           </div>
         </div>
 
-        {/* Edit / View Form */}
-        <div style={{
-          background: "#1a1a1a", borderRadius: "20px",
-          padding: "24px", border: "1px solid #2a2a2a",
-          display: "flex", flexDirection: "column", gap: "18px"
-        }}>
+        {/* Info / Edit Form */}
+        <div className="glass-card" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
 
-          {/* Name */}
-          <div>
-            <label style={{ color: "#888", fontSize: "12px", fontWeight: "600", letterSpacing: "1px" }}>
-              👤 FULL NAME
-            </label>
-            {editing ? (
-              <input
-                value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
-                style={inputStyle}
-              />
-            ) : (
-              <p style={{ color: "#fff", fontSize: "16px", marginTop: "6px" }}>{user.name}</p>
-            )}
-          </div>
+          {[
+            { label: "👤 FULL NAME", key: "name", type: "text", placeholder: "Your name" },
+            { label: "🎂 AGE", key: "age", type: "number", placeholder: "Your age" },
+          ].map(({ label, key, type, placeholder }) => (
+            <div key={key}>
+              <label style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px" }}>
+                {label}
+              </label>
+              {editing ? (
+                <input
+                  type={type}
+                  value={form[key]}
+                  onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  placeholder={placeholder}
+                  style={inputStyle}
+                />
+              ) : (
+                <p style={{ color: "#fff", fontSize: "16px", marginTop: "6px", fontWeight: "500" }}>
+                  {user[key] || <span style={{ color: "rgba(255,255,255,0.2)" }}>Not set</span>}
+                </p>
+              )}
+            </div>
+          ))}
 
-          {/* Age */}
           <div>
-            <label style={{ color: "#888", fontSize: "12px", fontWeight: "600", letterSpacing: "1px" }}>
-              🎂 AGE
-            </label>
-            {editing ? (
-              <input
-                type="number"
-                value={form.age}
-                onChange={e => setForm({ ...form, age: e.target.value })}
-                style={inputStyle}
-              />
-            ) : (
-              <p style={{ color: "#fff", fontSize: "16px", marginTop: "6px" }}>{user.age}</p>
-            )}
-          </div>
-
-          {/* Gender */}
-          <div>
-            <label style={{ color: "#888", fontSize: "12px", fontWeight: "600", letterSpacing: "1px" }}>
+            <label style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px" }}>
               ⚧ GENDER
             </label>
             {editing ? (
-              <select
-                value={form.gender}
-                onChange={e => setForm({ ...form, gender: e.target.value })}
-                style={inputStyle}
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+              <select value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })} style={{ ...inputStyle }}>
+                <option value="male" style={{ background: "#0f0f14" }}>Male</option>
+                <option value="female" style={{ background: "#0f0f14" }}>Female</option>
+                <option value="other" style={{ background: "#0f0f14" }}>Other</option>
               </select>
             ) : (
-              <p style={{ color: "#fff", fontSize: "16px", marginTop: "6px", textTransform: "capitalize" }}>
+              <p style={{ color: "#fff", fontSize: "16px", marginTop: "6px", textTransform: "capitalize", fontWeight: "500" }}>
                 {user.gender}
               </p>
             )}
           </div>
 
-          {/* Bio */}
           <div>
-            <label style={{ color: "#888", fontSize: "12px", fontWeight: "600", letterSpacing: "1px" }}>
+            <label style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px" }}>
               📝 BIO
             </label>
             {editing ? (
@@ -238,18 +222,17 @@ function Profile() {
                 onChange={e => setForm({ ...form, bio: e.target.value })}
                 rows={3}
                 placeholder="Tell something about yourself..."
-                style={{ ...inputStyle, resize: "none", fontFamily: "inherit" }}
+                style={{ ...inputStyle, resize: "none" }}
               />
             ) : (
-              <p style={{ color: "#fff", fontSize: "15px", marginTop: "6px", lineHeight: "1.6" }}>
-                {user.bio || <span style={{ color: "#555" }}>No bio yet</span>}
+              <p style={{ color: "#fff", fontSize: "15px", marginTop: "6px", lineHeight: "1.7", fontWeight: "400" }}>
+                {user.bio || <span style={{ color: "rgba(255,255,255,0.2)" }}>No bio yet</span>}
               </p>
             )}
           </div>
 
-          {/* Interests */}
           <div>
-            <label style={{ color: "#888", fontSize: "12px", fontWeight: "600", letterSpacing: "1px" }}>
+            <label style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px" }}>
               🎯 INTERESTS
             </label>
             {editing ? (
@@ -260,87 +243,77 @@ function Profile() {
                 style={inputStyle}
               />
             ) : (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
                 {(Array.isArray(user.interests) ? user.interests : []).map((interest, i) => (
-                  <span key={i} style={{
-                    background: "#2a2a2a", color: "#fd5068",
-                    padding: "6px 14px", borderRadius: "20px", fontSize: "13px"
-                  }}>#{interest}</span>
+                  <span key={i} className="tag">#{interest}</span>
                 ))}
                 {(!user.interests || user.interests.length === 0) && (
-                  <span style={{ color: "#555" }}>No interests added</span>
+                  <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "14px" }}>No interests added</span>
                 )}
               </div>
             )}
           </div>
 
-          {/* Cancel button when editing */}
           {editing && (
             <button
               onClick={() => setEditing(false)}
               style={{
                 padding: "12px", background: "transparent",
-                border: "1px solid #2a2a2a", borderRadius: "12px",
-                color: "#888", fontSize: "15px", cursor: "pointer"
-              }}>
-              Cancel
-            </button>
+                border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px",
+                color: "rgba(255,255,255,0.4)", fontSize: "15px", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif"
+              }}>Cancel</button>
           )}
         </div>
 
         {/* Action Buttons */}
         {!editing && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "20px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
             <Link to="/discover" style={{
-              display: "block", textAlign: "center", padding: "15px",
-              background: "linear-gradient(135deg, #fd5068, #ff8c5a)",
-              borderRadius: "14px", color: "#fff",
-              fontWeight: "700", fontSize: "16px",
+              display: "block", textAlign: "center", padding: "16px",
+              background: "linear-gradient(135deg, #ff2d55, #ff6b35)",
+              borderRadius: "16px", color: "#fff",
+              fontWeight: "700", fontSize: "15px",
               textDecoration: "none",
-              boxShadow: "0 8px 24px rgba(253,80,104,0.3)"
-            }}>
-              🔥 Discover People
-            </Link>
+              boxShadow: "0 8px 28px rgba(255,45,85,0.3)",
+              transition: "all 0.2s",
+              fontFamily: "'DM Sans', sans-serif"
+            }}>🔥 Discover People</Link>
 
-            <Link to="/matches" style={{
-              display: "block", textAlign: "center", padding: "15px",
-              background: "transparent",
-              border: "1px solid #2a2a2a",
-              borderRadius: "14px", color: "#fff",
-              fontWeight: "600", fontSize: "16px",
-              textDecoration: "none"
-            }}>
-              ❤️ Your Matches
-            </Link>
+            <Link to="/matches" className="glass-card" style={{
+              display: "block", textAlign: "center", padding: "16px",
+              color: "rgba(255,255,255,0.7)", fontWeight: "600", fontSize: "15px",
+              textDecoration: "none", borderRadius: "16px",
+              fontFamily: "'DM Sans', sans-serif"
+            }}>❤️ Your Matches</Link>
 
             <button
               onClick={() => { localStorage.clear(); navigate("/"); }}
               style={{
-                padding: "15px", background: "transparent",
-                border: "1px solid #ff000040",
-                borderRadius: "14px", color: "#ff4444",
-                fontSize: "16px", cursor: "pointer", fontWeight: "600"
-              }}>
-              🚪 Logout
-            </button>
+                padding: "16px", background: "rgba(255,0,0,0.05)",
+                border: "1px solid rgba(255,0,0,0.15)",
+                borderRadius: "16px", color: "#ff4444",
+                fontSize: "15px", cursor: "pointer", fontWeight: "600",
+                fontFamily: "'DM Sans', sans-serif",
+                transition: "all 0.2s"
+              }}
+              onMouseOver={e => e.currentTarget.style.background = "rgba(255,0,0,0.1)"}
+              onMouseOut={e => e.currentTarget.style.background = "rgba(255,0,0,0.05)"}
+            >🚪 Logout</button>
           </div>
         )}
       </div>
 
       {/* Bottom Nav */}
-      <div style={{
-        position: "fixed", bottom: 0, left: 0, right: 0,
-        background: "#1a1a1a", borderTop: "1px solid #2a2a2a",
-        display: "flex", justifyContent: "space-around", padding: "14px 0"
-      }}>
-        <button onClick={() => navigate("/discover")}
-          style={{ background: "none", border: "none", fontSize: "26px", cursor: "pointer" }}>🔥</button>
-        <button onClick={() => navigate("/matches")}
-          style={{ background: "none", border: "none", fontSize: "26px", cursor: "pointer" }}>❤️</button>
-        <button onClick={() => navigate("/profile")}
-          style={{ background: "none", border: "none", fontSize: "26px", cursor: "pointer",
-            filter: "drop-shadow(0 0 8px #fd5068)" }}>👤</button>
+      <div className="bottom-nav">
+        <button className="nav-btn" onClick={() => navigate("/discover")}>🔥</button>
+        <button className="nav-btn" onClick={() => navigate("/matches")}>❤️</button>
+        <button className="nav-btn active" onClick={() => navigate("/profile")}>👤</button>
       </div>
+
+      <style>{`
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+      `}</style>
     </div>
   );
 }
