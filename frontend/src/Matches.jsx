@@ -18,100 +18,69 @@ function Matches() {
   }, []);
 
   if (loading) return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #060608 0%, #0f0610 50%, #060608 100%)",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center", gap: "16px",
-      position: "relative"
-    }}>
-      <AnimatedBackground />
-      <div style={{ fontSize: "52px", animation: "heartbeat 1.5s ease-in-out infinite", zIndex: 1 }}>💕</div>
-      <p style={{ color: "rgba(255,255,255,0.4)", zIndex: 1 }}>Loading your matches...</p>
-      <style>{`@keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.2)} 28%{transform:scale(1)} 42%{transform:scale(1.15)} 70%{transform:scale(1)} }`}</style>
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "12px" }}>
+      <div style={{ width: "20px", height: "20px", border: "2px solid rgba(255,255,255,0.1)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #060608 0%, #0f0610 50%, #060608 100%)",
-      paddingBottom: "80px",
-      position: "relative"
-    }}>
-      <AnimatedBackground />
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", paddingBottom: "80px", position: "relative" }}>
+      <AnimatedBackground intensity="subtle" />
 
       {/* Header */}
       <div style={{
-        padding: "24px",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
-        background: "rgba(6,6,8,0.8)",
-        backdropFilter: "blur(20px)",
+        padding: "20px", borderBottom: "1px solid rgba(255,255,255,0.06)",
+        background: "rgba(10,10,10,0.9)", backdropFilter: "blur(20px)",
         position: "sticky", top: 0, zIndex: 10
       }}>
-        <h1 style={{
-          fontSize: "26px", fontWeight: "800",
-          fontFamily: "'Playfair Display', serif",
-          background: "linear-gradient(135deg, #ff2d55, #ff6b35)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent"
-        }}>Your Matches 💞</h1>
-        <p style={{ color: "rgba(255,255,255,0.3)", marginTop: "4px", fontSize: "13px" }}>
-          {matches.length} {matches.length === 1 ? "match" : "matches"} found
+        <h1 style={{ fontSize: "22px", fontWeight: "800", letterSpacing: "-0.5px" }}>Matches</h1>
+        <p style={{ color: "rgba(255,255,255,0.3)", marginTop: "2px", fontSize: "13px" }}>
+          {matches.length} {matches.length === 1 ? "match" : "matches"}
         </p>
       </div>
 
-      <div style={{ padding: "24px", position: "relative", zIndex: 1 }}>
+      <div style={{ padding: "20px", position: "relative", zIndex: 1 }}>
         {matches.length === 0 ? (
-          <div style={{ textAlign: "center", marginTop: "80px", animation: "fadeInUp 0.5s ease" }}>
-            <div style={{ fontSize: "72px", marginBottom: "16px" }}>💔</div>
-            <h2 style={{
-              color: "#fff", fontSize: "24px",
-              fontFamily: "'Playfair Display', serif",
-              marginBottom: "10px"
-            }}>No matches yet!</h2>
-            <p style={{ color: "rgba(255,255,255,0.4)", marginBottom: "32px" }}>Keep swiping to find your match</p>
-            <button
-              onClick={() => navigate("/discover")}
-              className="btn-primary"
-              style={{ width: "auto", padding: "14px 36px" }}
-            >Start Swiping 🔥</button>
+          <div style={{ textAlign: "center", marginTop: "100px", animation: "fadeInUp 0.5s ease" }}>
+            <div style={{ fontSize: "64px", marginBottom: "16px" }}>💔</div>
+            <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "8px", letterSpacing: "-0.3px" }}>No matches yet</h2>
+            <p style={{ color: "rgba(255,255,255,0.35)", marginBottom: "28px", fontSize: "14px" }}>Keep swiping to find your match</p>
+            <button onClick={() => navigate("/discover")} style={{
+              padding: "13px 28px", background: "#fff", borderRadius: "12px",
+              color: "#000", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer"
+            }}>Start Swiping</button>
           </div>
         ) : (
           <>
-            {/* Top matches horizontal scroll */}
-            <div style={{ marginBottom: "32px" }}>
-              <p style={{
-                color: "rgba(255,255,255,0.3)", fontSize: "11px",
-                marginBottom: "16px", fontWeight: "700",
-                letterSpacing: "2px", textTransform: "uppercase"
-              }}>NEW MATCHES</p>
-              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px" }}>
+            {/* Stories row */}
+            <div style={{ marginBottom: "28px" }}>
+              <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", marginBottom: "14px", textTransform: "uppercase" }}>
+                New Matches
+              </p>
+              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "4px" }}>
                 {matches.map((match, i) => (
-                  <div
-                    key={i}
-                    onClick={() => navigate(`/chat/${match._id}`)}
-                    style={{
-                      textAlign: "center", cursor: "pointer",
-                      flexShrink: 0,
-                      animation: `fadeInUp 0.4s ease ${i * 0.08}s both`
-                    }}
-                  >
+                  <div key={i} onClick={() => navigate(`/chat/${match._id}`)}
+                    style={{ textAlign: "center", cursor: "pointer", flexShrink: 0, animation: `fadeInUp 0.4s ease ${i * 0.06}s both` }}>
                     <div style={{
-                      width: "68px", height: "68px", borderRadius: "50%",
-                      background: "linear-gradient(135deg, #ff2d55, #ff6b35)",
+                      width: "62px", height: "62px", borderRadius: "50%",
+                      background: "#1a1a1a",
+                      border: "2px solid rgba(255,255,255,0.1)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: "28px", margin: "0 auto 8px",
-                      border: "2px solid rgba(255,45,85,0.4)",
-                      boxShadow: "0 0 20px rgba(255,45,85,0.25)",
-                      transition: "transform 0.2s"
+                      fontSize: "26px", margin: "0 auto 6px",
+                      transition: "all 0.2s", position: "relative"
                     }}
-                      onMouseOver={e => e.currentTarget.style.transform = "scale(1.1)"}
-                      onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
+                      onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.transform = "scale(1.05)"; }}
+                      onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.transform = "scale(1)"; }}
                     >
                       {match.gender === "female" ? "👩" : "👨"}
+                      <div style={{
+                        position: "absolute", bottom: "1px", right: "1px",
+                        width: "12px", height: "12px", borderRadius: "50%",
+                        background: "#00c853", border: "2px solid #0a0a0a"
+                      }} />
                     </div>
-                    <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "11px", fontWeight: "600" }}>
+                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "11px", fontWeight: "500" }}>
                       {match.name.split(" ")[0]}
                     </p>
                   </div>
@@ -119,70 +88,49 @@ function Matches() {
               </div>
             </div>
 
-            {/* Messages section */}
-            <p style={{
-              color: "rgba(255,255,255,0.3)", fontSize: "11px",
-              marginBottom: "16px", fontWeight: "700",
-              letterSpacing: "2px", textTransform: "uppercase"
-            }}>MESSAGES</p>
+            {/* Divider */}
+            <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "20px" }} />
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", marginBottom: "14px", textTransform: "uppercase" }}>
+              Messages
+            </p>
+
+            {/* List */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
               {matches.map((match, i) => (
-                <div
-                  key={i}
-                  onClick={() => navigate(`/chat/${match._id}`)}
-                  className="glass-card"
+                <div key={i} onClick={() => navigate(`/chat/${match._id}`)}
                   style={{
-                    display: "flex", alignItems: "center", gap: "16px",
-                    padding: "16px 20px",
-                    cursor: "pointer", transition: "all 0.2s",
-                    animation: `fadeInUp 0.4s ease ${i * 0.08}s both`
+                    display: "flex", alignItems: "center", gap: "14px",
+                    padding: "14px 16px", borderRadius: "14px",
+                    cursor: "pointer", transition: "all 0.15s",
+                    animation: `fadeInUp 0.4s ease ${i * 0.06}s both`
                   }}
-                  onMouseOver={e => {
-                    e.currentTarget.style.borderColor = "rgba(255,45,85,0.3)";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = "0 8px 32px rgba(255,45,85,0.12)";
-                  }}
-                  onMouseOut={e => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
+                  onMouseOver={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                  onMouseOut={e => e.currentTarget.style.background = "transparent"}
                 >
                   <div style={{
-                    width: "54px", height: "54px", borderRadius: "50%",
-                    background: "linear-gradient(135deg, #ff2d55, #ff6b35)",
+                    width: "52px", height: "52px", borderRadius: "50%",
+                    background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "24px", flexShrink: 0,
-                    boxShadow: "0 4px 16px rgba(255,45,85,0.3)"
+                    fontSize: "22px", flexShrink: 0, position: "relative"
                   }}>
                     {match.gender === "female" ? "👩" : "👨"}
+                    <div style={{
+                      position: "absolute", bottom: "1px", right: "1px",
+                      width: "10px", height: "10px", borderRadius: "50%",
+                      background: "#00c853", border: "2px solid #0a0a0a"
+                    }} />
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                      <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#fff" }}>{match.name}</h3>
-                      <span style={{
-                        background: "rgba(255,45,85,0.12)", color: "#ff2d55",
-                        padding: "2px 8px", borderRadius: "10px", fontSize: "11px",
-                        border: "1px solid rgba(255,45,85,0.2)"
-                      }}>{match.age}</span>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "3px" }}>
+                      <h3 style={{ fontSize: "15px", fontWeight: "700" }}>{match.name}</h3>
+                      <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px" }}>now</span>
                     </div>
-                    <p style={{
-                      color: "rgba(255,255,255,0.3)", fontSize: "13px",
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
-                    }}>
-                      {match.bio || "Tap to say hello! 👋"}
+                    <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "13px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {match.bio || "Tap to say hello 👋"}
                     </p>
                   </div>
-
-                  <div style={{
-                    width: "34px", height: "34px", borderRadius: "50%",
-                    background: "linear-gradient(135deg, #ff2d55, #ff6b35)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "14px", flexShrink: 0,
-                    boxShadow: "0 4px 12px rgba(255,45,85,0.3)"
-                  }}>💬</div>
                 </div>
               ))}
             </div>
@@ -192,14 +140,17 @@ function Matches() {
 
       {/* Bottom Nav */}
       <div className="bottom-nav">
-        <button className="nav-btn" onClick={() => navigate("/discover")}>🔥</button>
-        <button className="nav-btn active" onClick={() => navigate("/matches")}>❤️</button>
-        <button className="nav-btn" onClick={() => navigate("/profile")}>👤</button>
+        <button className="nav-btn" onClick={() => navigate("/discover")}><span className="icon">🔥</span><span>Discover</span></button>
+        <button className="nav-btn active" onClick={() => navigate("/matches")}><span className="icon">❤️</span><span>Matches</span></button>
+        <button className="nav-btn" onClick={() => navigate("/profile")}><span className="icon">👤</span><span>Profile</span></button>
       </div>
 
       <style>{`
-        @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.2)} 28%{transform:scale(1)} 42%{transform:scale(1.15)} 70%{transform:scale(1)} }
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes meshMove1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(150px,60px) scale(1.1)}}
+        @keyframes meshMove2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-60px,-100px) scale(1.2)}}
+        @keyframes particleFloat{0%{transform:translateY(110vh) rotate(0deg);opacity:0}5%{opacity:1}95%{opacity:0.4}100%{transform:translateY(-10vh) rotate(720deg);opacity:0}}
+        @keyframes scanMove{0%{background-position:0 0}100%{background-position:0 100px}}
       `}</style>
     </div>
   );
