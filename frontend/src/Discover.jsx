@@ -14,7 +14,7 @@ function Discover() {
 
   useEffect(() => {
     if (!token) { navigate("/"); return; }
-    axios.get("http://localhost:5000/api/match/discover", {
+    axios.get("https://affinity-hub.onrender.com/api/match/discover", {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => { setUsers(res.data); setLoading(false); })
     .catch(() => navigate("/"));
@@ -25,7 +25,7 @@ function Discover() {
     setTimeout(async () => {
       try {
         const res = await axios.post(
-          `http://localhost:5000/api/match/like/${users[current]._id}`,
+          `https://affinity-hub.onrender.com/api/match/like/${users[current]._id}`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );

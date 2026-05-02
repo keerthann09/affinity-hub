@@ -31,7 +31,7 @@ function Profile() {
     setSaving(true);
     try {
       const res = await axios.put(
-        "http://localhost:5000/api/auth/profile",
+        "https://affinity-hub.onrender.com/api/auth/profile",
         {
           ...form,
           age: Number(form.age),

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://affinity-hub.onrender.com");
 
 function Chat() {
   const [messages, setMessages] = useState([]);
@@ -53,7 +53,7 @@ function Chat() {
   const fetchMatchUser = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/match/user/${id}`,
+        `https://affinity-hub.onrender.com/api/match/user/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMatchUser(res.data);
@@ -63,7 +63,7 @@ function Chat() {
   const fetchMessages = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/chat/${id}`,
+        `https://affinity-hub.onrender.com/api/chat/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessages(res.data);
@@ -89,7 +89,7 @@ function Chat() {
     try {
       // Save to DB
       await axios.post(
-        `http://localhost:5000/api/chat/${id}`,
+        `https://affinity-hub.onrender.com/api/chat/${id}`,
         { message: msgText },
         { headers: { Authorization: `Bearer ${token}` } }
       );

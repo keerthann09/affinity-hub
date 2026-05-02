@@ -10,7 +10,7 @@ function Matches() {
 
   useEffect(() => {
     if (!token) { navigate("/"); return; }
-    axios.get("http://localhost:5000/api/match/matches", {
+    axios.get("https://affinity-hub.onrender.com/api/match/matches", {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => { setMatches(res.data); setLoading(false); })
     .catch(() => setLoading(false));
