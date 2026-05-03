@@ -53,7 +53,6 @@ function Matches() {
           </div>
         ) : (
           <>
-            {/* Stories row */}
             <div style={{ marginBottom: "28px" }}>
               <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", marginBottom: "14px", textTransform: "uppercase" }}>
                 New Matches
@@ -64,8 +63,7 @@ function Matches() {
                     style={{ textAlign: "center", cursor: "pointer", flexShrink: 0, animation: `fadeInUp 0.4s ease ${i * 0.06}s both` }}>
                     <div style={{
                       width: "62px", height: "62px", borderRadius: "50%",
-                      background: "#1a1a1a",
-                      border: "2px solid rgba(255,255,255,0.1)",
+                      background: "#1a1a1a", border: "2px solid rgba(255,255,255,0.1)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: "26px", margin: "0 auto 6px",
                       transition: "all 0.2s", position: "relative"
@@ -88,14 +86,12 @@ function Matches() {
               </div>
             </div>
 
-            {/* Divider */}
             <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "20px" }} />
 
             <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px", fontWeight: "700", letterSpacing: "1.5px", marginBottom: "14px", textTransform: "uppercase" }}>
               Messages
             </p>
 
-            {/* List */}
             <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
               {matches.map((match, i) => (
                 <div key={i} onClick={() => navigate(`/chat/${match._id}`)}
@@ -138,7 +134,6 @@ function Matches() {
         )}
       </div>
 
-      {/* Bottom Nav */}
       <div className="bottom-nav">
         <button className="nav-btn" onClick={() => navigate("/discover")}><span className="icon">🔥</span><span>Discover</span></button>
         <button className="nav-btn active" onClick={() => navigate("/matches")}><span className="icon">❤️</span><span>Matches</span></button>
@@ -147,10 +142,7 @@ function Matches() {
 
       <style>{`
         @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes meshMove1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(150px,60px) scale(1.1)}}
-        @keyframes meshMove2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-60px,-100px) scale(1.2)}}
-        @keyframes particleFloat{0%{transform:translateY(110vh) rotate(0deg);opacity:0}5%{opacity:1}95%{opacity:0.4}100%{transform:translateY(-10vh) rotate(720deg);opacity:0}}
-        @keyframes scanMove{0%{background-position:0 0}100%{background-position:0 100px}}
+        @keyframes spin{to{transform:rotate(360deg)}}
       `}</style>
     </div>
   );

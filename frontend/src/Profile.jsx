@@ -123,12 +123,13 @@ function Profile() {
         )}
 
         {/* Profile Card */}
-        <div className="glass-card" style={{ marginBottom: "20px", overflow: "hidden" }}>
+        <div className="glass-card" style={{ marginBottom: "20px", overflow: "hidden", padding: 0 }}>
           {/* Cover */}
           <div style={{
-            height: "110px",
+            height: "140px",
             background: "linear-gradient(135deg, #ff2d55 0%, #ff6b35 100%)",
-            position: "relative", overflow: "hidden"
+            position: "relative", overflow: "hidden",
+            borderRadius:"16px 16px 0 0"
           }}>
             <div style={{
               position: "absolute", width: "200px", height: "200px",

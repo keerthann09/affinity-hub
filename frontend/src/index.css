@@ -1,9 +1,11 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-* {
+
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
 
@@ -39,7 +41,6 @@ a { text-decoration: none; color: inherit; }
   overflow: hidden;
 }
 
-/* Moving gradient mesh */
 .threads-bg::before {
   content: '';
   position: absolute;
@@ -110,7 +111,6 @@ a { text-decoration: none; color: inherit; }
   100% { background-position: 0 100px; }
 }
 
-/* Moving border light */
 @keyframes borderGlow {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 0.8; }
