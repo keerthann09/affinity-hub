@@ -23,8 +23,6 @@ function Chat() {
   const { id } = useParams();
   const messagesEndRef = useRef(null);
   const tracksRef = useRef(null);
-  const myVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
 
   useEffect(() => {
     if (!token) { navigate("/"); return; }
@@ -44,14 +42,12 @@ function Chat() {
       }
     });
 
-    // ✅ Incoming call signal
     socket.on("incomingCall", ({ callerId, callType }) => {
       setIncomingCall({ callerId, callType });
       setCallType(callType);
       setCallState("receiving");
     });
 
-    // ✅ Call accepted — both join same channel
     socket.on("callAccepted", async ({ channelName, callType }) => {
       await startAgoraCall(channelName, callType);
       setCallState("ongoing");
@@ -66,14 +62,8 @@ function Chat() {
       endCall();
     });
 
-    // ✅ Listen for remote user
     onUserJoined((user, mediaType) => {
-      if (mediaType === "video" && remoteVideoRef.current) {
-        user.videoTrack?.play(remoteVideoRef.current);
-      }
-      if (mediaType === "audio") {
-        user.audioTrack?.play();
-      }
+      console.log("Remote user joined:", user, mediaType);
     });
 
     return () => {
@@ -110,51 +100,36 @@ function Chat() {
     } catch (err) {}
   };
 
-  // ✅ Start Agora call
   const startAgoraCall = async (channelName, type) => {
     try {
       const { tracks } = await joinCall(channelName, type);
       tracksRef.current = tracks;
-
-      // Play local video
-      if (type === "video" && myVideoRef.current) {
-        const videoTrack = tracks.find(t => t.trackMediaType === "video");
-        if (videoTrack) videoTrack.play(myVideoRef.current);
-      }
     } catch (err) {
       alert("Could not access camera/microphone. Please allow permissions.");
       setCallState("idle");
     }
   };
 
-  // ✅ Caller starts call
   const startCall = async (type) => {
     setCallType(type);
     setCallState("calling");
-
-    // Channel name = sorted user IDs so both join same channel
     const channelName = [currentUser.id, id].sort().join("-");
-
     socket.emit("callUser", {
       callerId: currentUser.id,
       receiverId: id,
       callType: type,
       channelName
     });
-
     await startAgoraCall(channelName, type);
   };
 
-  // ✅ Receiver accepts call
   const acceptCall = async () => {
     const channelName = [currentUser.id, incomingCall.callerId].sort().join("-");
-
     socket.emit("acceptCall", {
       callerId: incomingCall.callerId,
       channelName,
       callType
     });
-
     await startAgoraCall(channelName, callType);
     setCallState("ongoing");
   };
@@ -272,15 +247,17 @@ function Chat() {
         }}>
           {callType === "video" ? (
             <>
-              <div ref={remoteVideoRef} style={{
-                width: "100%", maxHeight: "60vh",
+              {/* ✅ Remote video */}
+              <div id="remote-video" style={{
+                width: "100%", height: "60vh",
                 borderRadius: "16px", background: "#111"
               }} />
-              <div ref={myVideoRef} style={{
+              {/* ✅ Local video */}
+              <div id="local-video" style={{
                 width: "120px", height: "160px",
                 position: "absolute", bottom: "100px", right: "20px",
                 borderRadius: "12px", border: "2px solid #fd5068",
-                background: "#222", overflow: "hidden"
+                background: "#222"
               }} />
             </>
           ) : (

@@ -25,6 +25,8 @@ export const joinCall = async (channelName, callType) => {
   if (callType === "video") {
     const cameraTrack = await AgoraRTC.createCameraVideoTrack();
     tracks.push(cameraTrack);
+    // ✅ Play local video in div
+    cameraTrack.play("local-video");
   }
 
   await client.publish(tracks);
@@ -44,6 +46,13 @@ export const leaveCall = async (tracks) => {
 export const onUserJoined = (callback) => {
   client.on("user-published", async (user, mediaType) => {
     await client.subscribe(user, mediaType);
+    if (mediaType === "video") {
+      // ✅ Play remote video in div
+      user.videoTrack?.play("remote-video");
+    }
+    if (mediaType === "audio") {
+      user.audioTrack?.play();
+    }
     callback(user, mediaType);
   });
 };
