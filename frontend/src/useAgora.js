@@ -1,11 +1,19 @@
 import AgoraRTC from "agora-rtc-sdk-ng";
 
 const APP_ID = "da95a58caea341e8a062c20325a344c2";
+const BACKEND_URL = "https://affinity-hub.onrender.com";
 
 const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
+const getToken = async (channelName) => {
+  const res = await fetch(`${BACKEND_URL}/api/agora/token?channelName=${channelName}&uid=0`);
+  const data = await res.json();
+  return data.token;
+};
+
 export const joinCall = async (channelName, callType) => {
-  await client.join(APP_ID, channelName, null, null);
+  const token = await getToken(channelName);
+  await client.join(APP_ID, channelName, token, null);
 
   const tracks = [];
 
