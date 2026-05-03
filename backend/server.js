@@ -32,6 +32,10 @@ app.use("/api/match", matchRoutes);
 const chatRoutes = require("./routes/chat");
 app.use("/api/chat", chatRoutes);
 
+// ✅ Agora token route
+const agoraRoutes = require("./routes/agora");
+app.use("/api/agora", agoraRoutes);
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("DB connected"))
   .catch((err) => console.log(err));
@@ -57,7 +61,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Typing indicator
   socket.on("typing", ({ senderId, receiverId }) => {
     const receiverSocket = onlineUsers[receiverId];
     if (receiverSocket) {
@@ -65,7 +68,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ✅ Call signaling
   socket.on("callUser", ({ callerId, receiverId, callType, channelName }) => {
     const receiverSocket = onlineUsers[receiverId];
     if (receiverSocket) {
@@ -91,7 +93,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ✅ End call
   socket.on("endCall", ({ receiverId }) => {
     const receiverSocket = onlineUsers[receiverId];
     if (receiverSocket) {
