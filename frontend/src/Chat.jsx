@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import Peer from "peerjs";
 import { Phone, Video, PhoneOff } from "lucide-react";
+import { joinCall, leaveCall, onUserJoined } from "./useAgora";
 
 const socket = io("https://affinity-hub.onrender.com");
 
@@ -22,11 +22,9 @@ function Chat() {
   const navigate = useNavigate();
   const { id } = useParams();
   const messagesEndRef = useRef(null);
-  const peerRef = useRef(null);
+  const tracksRef = useRef(null);
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
-  const currentCallRef = useRef(null);
-  const myStreamRef = useRef(null);
 
   useEffect(() => {
     if (!token) { navigate("/"); return; }
@@ -34,26 +32,6 @@ function Chat() {
     socket.emit("join", currentUser.id);
     fetchMatchUser();
     fetchMessages();
-
-    const peer = new Peer(currentUser.id, {
-      host: "affinity-hub.onrender.com",
-      path: "/peerjs",
-      secure: true
-    });
-    peerRef.current = peer;
-
-    peer.on("call", (call) => {
-      currentCallRef.current = call;
-      const stream = myStreamRef.current;
-      if (stream) {
-        call.answer(stream);
-        call.on("stream", (remoteStream) => {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = remoteStream;
-          }
-        });
-      }
-    });
 
     socket.on("receiveMessage", (msg) => {
       setMessages(prev => [...prev, msg]);
@@ -66,23 +44,16 @@ function Chat() {
       }
     });
 
-    socket.on("incomingCall", ({ callerId, callerPeerId, callType }) => {
-      setIncomingCall({ callerId, callerPeerId, callType });
+    // ✅ Incoming call signal
+    socket.on("incomingCall", ({ callerId, callType }) => {
+      setIncomingCall({ callerId, callType });
       setCallType(callType);
       setCallState("receiving");
     });
 
-    socket.on("callAccepted", ({ receiverPeerId }) => {
-      const stream = myStreamRef.current;
-      if (stream && peerRef.current) {
-        const call = peerRef.current.call(receiverPeerId, stream);
-        currentCallRef.current = call;
-        call.on("stream", (remoteStream) => {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = remoteStream;
-          }
-        });
-      }
+    // ✅ Call accepted — both join same channel
+    socket.on("callAccepted", async ({ channelName, callType }) => {
+      await startAgoraCall(channelName, callType);
       setCallState("ongoing");
     });
 
@@ -91,13 +62,27 @@ function Chat() {
       alert("Call was declined.");
     });
 
+    socket.on("callEnded", () => {
+      endCall();
+    });
+
+    // ✅ Listen for remote user
+    onUserJoined((user, mediaType) => {
+      if (mediaType === "video" && remoteVideoRef.current) {
+        user.videoTrack?.play(remoteVideoRef.current);
+      }
+      if (mediaType === "audio") {
+        user.audioTrack?.play();
+      }
+    });
+
     return () => {
       socket.off("receiveMessage");
       socket.off("typing");
       socket.off("incomingCall");
       socket.off("callAccepted");
       socket.off("callRejected");
-      peer.destroy();
+      socket.off("callEnded");
     };
   }, []);
 
@@ -125,34 +110,52 @@ function Chat() {
     } catch (err) {}
   };
 
+  // ✅ Start Agora call
+  const startAgoraCall = async (channelName, type) => {
+    try {
+      const { tracks } = await joinCall(channelName, type);
+      tracksRef.current = tracks;
+
+      // Play local video
+      if (type === "video" && myVideoRef.current) {
+        const videoTrack = tracks.find(t => t.trackMediaType === "video");
+        if (videoTrack) videoTrack.play(myVideoRef.current);
+      }
+    } catch (err) {
+      alert("Could not access camera/microphone. Please allow permissions.");
+      setCallState("idle");
+    }
+  };
+
+  // ✅ Caller starts call
   const startCall = async (type) => {
     setCallType(type);
     setCallState("calling");
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: type === "video",
-      audio: true
-    });
-    myStreamRef.current = stream;
-    if (myVideoRef.current) myVideoRef.current.srcObject = stream;
+
+    // Channel name = sorted user IDs so both join same channel
+    const channelName = [currentUser.id, id].sort().join("-");
+
     socket.emit("callUser", {
       callerId: currentUser.id,
       receiverId: id,
-      callerPeerId: currentUser.id,
-      callType: type
+      callType: type,
+      channelName
     });
+
+    await startAgoraCall(channelName, type);
   };
 
+  // ✅ Receiver accepts call
   const acceptCall = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: callType === "video",
-      audio: true
-    });
-    myStreamRef.current = stream;
-    if (myVideoRef.current) myVideoRef.current.srcObject = stream;
+    const channelName = [currentUser.id, incomingCall.callerId].sort().join("-");
+
     socket.emit("acceptCall", {
       callerId: incomingCall.callerId,
-      receiverPeerId: currentUser.id
+      channelName,
+      callType
     });
+
+    await startAgoraCall(channelName, callType);
     setCallState("ongoing");
   };
 
@@ -162,11 +165,10 @@ function Chat() {
     setIncomingCall(null);
   };
 
-  const endCall = () => {
-    if (currentCallRef.current) currentCallRef.current.close();
-    if (myStreamRef.current) {
-      myStreamRef.current.getTracks().forEach(t => t.stop());
-    }
+  const endCall = async () => {
+    await leaveCall(tracksRef.current);
+    tracksRef.current = null;
+    socket.emit("endCall", { receiverId: id });
     setCallState("idle");
     setCallType(null);
     setIncomingCall(null);
@@ -230,10 +232,8 @@ function Chat() {
             padding: "40px", textAlign: "center",
             border: "1px solid #fd5068"
           }}>
-            <div style={{ marginBottom: "16px", color: "#fd5068" }}>
-              {callType === "video"
-                ? <Video size={60} />
-                : <Phone size={60} />}
+            <div style={{ marginBottom: "16px", color: "#fd5068", display: "flex", justifyContent: "center" }}>
+              {callType === "video" ? <Video size={60} /> : <Phone size={60} />}
             </div>
             <h3 style={{ color: "#fff", marginBottom: "8px" }}>
               {matchUser?.name} is calling...
@@ -272,18 +272,22 @@ function Chat() {
         }}>
           {callType === "video" ? (
             <>
-              <video ref={remoteVideoRef} autoPlay playsInline
-                style={{ width: "100%", maxHeight: "60vh", borderRadius: "16px", background: "#111" }} />
-              <video ref={myVideoRef} autoPlay playsInline muted
-                style={{
-                  width: "120px", position: "absolute",
-                  bottom: "100px", right: "20px",
-                  borderRadius: "12px", border: "2px solid #fd5068"
-                }} />
+              <div ref={remoteVideoRef} style={{
+                width: "100%", maxHeight: "60vh",
+                borderRadius: "16px", background: "#111"
+              }} />
+              <div ref={myVideoRef} style={{
+                width: "120px", height: "160px",
+                position: "absolute", bottom: "100px", right: "20px",
+                borderRadius: "12px", border: "2px solid #fd5068",
+                background: "#222", overflow: "hidden"
+              }} />
             </>
           ) : (
             <div style={{ textAlign: "center" }}>
-              <Phone size={80} color="#fd5068" />
+              <div style={{ display: "flex", justifyContent: "center", color: "#fd5068" }}>
+                <Phone size={80} />
+              </div>
               <h2 style={{ color: "#fff", marginTop: "16px" }}>
                 {callState === "calling" ? "Calling..." : "On Call"}
               </h2>
@@ -338,7 +342,6 @@ function Chat() {
           )}
         </div>
 
-        {/* ✅ Standard icon call buttons */}
         <button onClick={() => startCall("audio")} style={{
           background: "none", border: "none", color: "#fff",
           cursor: "pointer", display: "flex", alignItems: "center", padding: "6px"

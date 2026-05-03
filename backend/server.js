@@ -19,7 +19,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-// ✅ PeerJS server
+// PeerJS server
 const peerServer = ExpressPeerServer(server, { debug: true });
 app.use('/peerjs', peerServer);
 
@@ -57,22 +57,30 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Typing indicator
+  socket.on("typing", ({ senderId, receiverId }) => {
+    const receiverSocket = onlineUsers[receiverId];
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("typing", { senderId });
+    }
+  });
+
   // ✅ Call signaling
-  socket.on("callUser", ({ callerId, receiverId, callerPeerId, callType }) => {
+  socket.on("callUser", ({ callerId, receiverId, callType, channelName }) => {
     const receiverSocket = onlineUsers[receiverId];
     if (receiverSocket) {
       io.to(receiverSocket).emit("incomingCall", {
         callerId,
-        callerPeerId,
-        callType
+        callType,
+        channelName
       });
     }
   });
 
-  socket.on("acceptCall", ({ callerId, receiverPeerId }) => {
+  socket.on("acceptCall", ({ callerId, channelName, callType }) => {
     const callerSocket = onlineUsers[callerId];
     if (callerSocket) {
-      io.to(callerSocket).emit("callAccepted", { receiverPeerId });
+      io.to(callerSocket).emit("callAccepted", { channelName, callType });
     }
   });
 
@@ -80,6 +88,14 @@ io.on("connection", (socket) => {
     const callerSocket = onlineUsers[callerId];
     if (callerSocket) {
       io.to(callerSocket).emit("callRejected");
+    }
+  });
+
+  // ✅ End call
+  socket.on("endCall", ({ receiverId }) => {
+    const receiverSocket = onlineUsers[receiverId];
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("callEnded");
     }
   });
 
