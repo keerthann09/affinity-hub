@@ -32,7 +32,7 @@ app.use("/api/match", matchRoutes);
 const chatRoutes = require("./routes/chat");
 app.use("/api/chat", chatRoutes);
 
-// ✅ Agora token route
+// Agora token route
 const agoraRoutes = require("./routes/agora");
 app.use("/api/agora", agoraRoutes);
 
@@ -48,6 +48,10 @@ io.on("connection", (socket) => {
   socket.on("join", (userId) => {
     onlineUsers[userId] = socket.id;
     console.log("User joined:", userId);
+
+    // ✅ Notify all senders that this user is now online (delivered)
+    // We broadcast to everyone who might have sent messages to this user
+    socket.broadcast.emit("userOnline", { userId });
   });
 
   socket.on("sendMessage", ({ senderId, receiverId, message }) => {
@@ -58,6 +62,9 @@ io.on("connection", (socket) => {
         message,
         createdAt: new Date()
       });
+
+      // ✅ Receiver is online so mark as delivered immediately
+      io.to(receiverSocket).emit("messageDelivered", { senderId });
     }
   });
 
@@ -68,14 +75,26 @@ io.on("connection", (socket) => {
     }
   });
 
+  // ✅ Receiver opened the chat — mark all as seen
+  socket.on("markSeen", ({ viewerId, senderId }) => {
+    const senderSocket = onlineUsers[senderId];
+    if (senderSocket) {
+      io.to(senderSocket).emit("messagesSeen", { by: viewerId });
+    }
+  });
+
+  // ✅ Messages delivered to receiver
+  socket.on("markDelivered", ({ receiverId, senderId }) => {
+    const senderSocket = onlineUsers[senderId];
+    if (senderSocket) {
+      io.to(senderSocket).emit("messagesDelivered", { to: receiverId });
+    }
+  });
+
   socket.on("callUser", ({ callerId, receiverId, callType, channelName }) => {
     const receiverSocket = onlineUsers[receiverId];
     if (receiverSocket) {
-      io.to(receiverSocket).emit("incomingCall", {
-        callerId,
-        callType,
-        channelName
-      });
+      io.to(receiverSocket).emit("incomingCall", { callerId, callType, channelName });
     }
   });
 
@@ -97,6 +116,14 @@ io.on("connection", (socket) => {
     const receiverSocket = onlineUsers[receiverId];
     if (receiverSocket) {
       io.to(receiverSocket).emit("callEnded");
+    }
+  });
+
+  // ✅ Delete message for everyone
+  socket.on("deleteMessageForEveryone", ({ messageId, receiverId }) => {
+    const receiverSocket = onlineUsers[receiverId];
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("messageDeletedForEveryone", { messageId });
     }
   });
 
